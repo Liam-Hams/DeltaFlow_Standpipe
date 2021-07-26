@@ -15,7 +15,7 @@ const char gprsPass[] = "";
 
 // VARIABLE DEFINITIONS
 #define PULSE_TIMEOUT 60000
-#define GPS_TIMEOUT 120000
+#define GPS_TIMEOUT 240000
 // Timer value is in microseconds (24hrs = 24*3600*10^6)
 /* VALUE SET TO 30s FOR DEBUGGING ONLY */
 #define SLEEP_TIME 30000000
@@ -222,7 +222,7 @@ void gpsLocation() {
     DBG("Current Location: Latitude:%f, Longitude:%f",latitude, longitude);
     }
 
-    else {
+    else if (((millis() - gps_start_time)/1000) == 5){
       DBG("Retrieving location");
     }
   }
