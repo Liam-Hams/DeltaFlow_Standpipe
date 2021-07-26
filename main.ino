@@ -222,7 +222,7 @@ void gpsLocation() {
     DBG("Current Location: Latitude:%f, Longitude:%f",latitude, longitude);
     }
 
-    else if (((millis() - gps_start_time)/1000) == 5){
+    else if (((millis() - gps_start_time)/1000) % 5 == 0){
       DBG("Retrieving location");
     }
   }
