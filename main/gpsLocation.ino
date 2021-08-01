@@ -8,10 +8,11 @@ void gpsLocation() {
   while ((millis() - gps_start_time) < GPS_TIMEOUT) {
     if (modem.getGPS(&latitude, &longitude)) {
     DBG("Current Location: Latitude:%f, Longitude:%f",latitude, longitude);
+      break; // seems neater than the bool variable and works
     }
 
-    else if (((millis() - gps_start_time)/1000) % 5 == 0){
-      DBG("Retrieving location");
+    else if (((millis() - gps_start_time)) % 200 == 0){
+      DBG("Retrieving location"); //don't know why this modulo code works better but it does 
     }
   }
   // Disable gps to save power
