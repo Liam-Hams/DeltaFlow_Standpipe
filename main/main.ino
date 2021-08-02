@@ -34,16 +34,24 @@ const char gprsPass[] = "";
 // LIBRARY INCLUSIONS
 #include <TinyGsmClient.h>
 #include <Ticker.h>
+#include <ArduinoHttpClient.h>
+
+// PIPE IDENTIFIER - SET BEFORE UPLOADING. MUST BE UNIQUE & NON-ZERO.
+int Pipe_Id = 1;
 
 // GLOBAL VARIABLES
 unsigned int total_pulses = 0;
 int pulse_count = 0;
+int wake_con = 0;
+unsigned int boot_count=0;
+String Loc_Id;
 float latitude;
 float longitude;
 
 // LIBRARY INSTANCES
 Ticker tick;
 TinyGsm modem(SerialAT);
+TinyGsmClient client(modem);
 
 // FUNCTION DEFINITIONS
 void flowCount();
