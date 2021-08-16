@@ -4,7 +4,7 @@ Code for the Standpipe device & server
 Languages: 
   - Arduino-C (ESP32 board)
   - SQLserver (Database)
-  - PHP (Server)
+  - Node.js (Server)
 
 Arduino Library Dependencies:
   - ArduinoHTTPClient 
