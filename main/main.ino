@@ -19,6 +19,7 @@ const char gprsPass[] = "";
 // Timer value is in microseconds (24hrs = 24*3600*10^6)
 /* VALUE SET TO 30s FOR DEBUGGING ONLY */
 #define SLEEP_TIME 30000000
+#define MAX_RECS 100
 
 // GPIO DEFINTIONS
 #define PIN_TX     27
@@ -47,6 +48,36 @@ unsigned int boot_count=0;
 String Loc_Id;
 float latitude;
 float longitude;
+int store_count;
+unsigned long date;
+unsigned long Time;
+bool netstatus;
+
+// OFFLINE STRUCTURES
+struct flow_data
+{
+  unsigned int tot_pulses;
+  int pulse_cnt;
+};
+
+struct loc_data
+{
+  float lat;
+  float lon;
+  unsigned long dat;
+  unsigned long tim;
+};
+
+typedef struct Data
+{
+  int b_count;
+  int w_con;
+  struct flow_data Flow;
+  struct loc_data Loc;
+} StorageType;
+
+StorageType dataRecs[MAX_RECS];
+
 
 // LIBRARY INSTANCES
 Ticker tick;
@@ -60,6 +91,8 @@ void gpsLocation();
 void gsmPowerDown();
 void httpPost();
 void netConnect();
+void offlineSort();
+void dataClear();
 
 //  SETUP FUNCTION
 void setup() {
@@ -114,6 +147,9 @@ void setup() {
     result = modem.setNetworkMode(2);
     delay(500);
   } while (result != true);
+
+  // Put Board to sleep
+  esp_light_sleep_start();
 }
 
 // LOOP FUNCTION - REINITIATES SLEEP

@@ -20,6 +20,9 @@ void wake() {
   // After every wake cycle, connect to network, send data, and disconnect.
   netConnect();
   gpsLocation();
-  httpPost();
+  // if net handshake is correctly performed, post data via HTTP Protocol
+  if(netstatus == true){
+    httpPost();
+  }
   gsmPowerDown();
 }
