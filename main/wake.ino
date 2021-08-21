@@ -9,6 +9,8 @@ void wake() {
     case ESP_SLEEP_WAKEUP_EXT0:
       Serial.println("Woke from flow counter");
       pulse_count++;
+      flowCount(); // remove
+      total_pulses = total_pulses + pulse_count; // remove
       break;
     // For timer, update location only
     case ESP_SLEEP_WAKEUP_TIMER:
@@ -22,5 +24,5 @@ void wake() {
   if(netstatus == true){
     httpPost();
   }
-  // gsmPowerDown();
+  gsmPowerDown(); // remove
 }
