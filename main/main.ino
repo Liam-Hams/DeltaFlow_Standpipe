@@ -8,14 +8,8 @@
 #define SerialAT Serial1
 #define TINY_GSM_DEBUG SerialMon
 
-#if CONFIG_FREERTOS_UNICORE
-#define ARDUINO_RUNNING_CORE 0
-#else
-#define ARDUINO_RUNNING_CORE 1
-#endif
-
 // GPRS DEFINITIONS
-const char apn[]  = "yesinternet";
+const char apn[]  = "telstra.iph";
 const char gprsUser[] = "";
 const char gprsPass[] = "";
 
@@ -58,7 +52,6 @@ int store_count;
 unsigned long date;
 unsigned long Time;
 bool netstatus;
-bool FLOW_ready_for_sleep;
 
 // OFFLINE STRUCTURES
 struct flow_data
@@ -101,91 +94,19 @@ void netConnect();
 void offlineSort();
 void dataClear();
 
-// TASK DEFINITIONS
-void FLOW( void *pvParameters );
-void SIM( void *pvParameters );
-
 //  SETUP FUNCTION
 void setup() {
   // Enable sleep wakeups from timer & EXT_0
   esp_sleep_enable_ext0_wakeup(FLOW_PIN, 1);
   esp_sleep_enable_timer_wakeup(SLEEP_TIME);
 
+  // Set flow meter connection as input
+  pinMode(FLOW_PIN, INPUT);
   // Commence Serial connection & wait for connection to be established
   SerialMon.begin(115200);
   while (!Serial) {
     ;
   }
-
-  // Now set up two tasks to run independently.
-  xTaskCreatePinnedToCore(
-    FLOW
-    ,  "Reading flow data"   // A name just for humans
-    ,  10240  // This stack size can be checked & adjusted by reading the Stack Highwater
-    ,  NULL
-    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-    ,  NULL 
-    ,  ARDUINO_RUNNING_CORE);
-
-  xTaskCreatePinnedToCore(
-    SIM
-    ,  "SIM operations"
-    ,  102400   // Stack size
-    ,  NULL
-    ,  2  // Priority
-    ,  NULL 
-    ,  ARDUINO_RUNNING_CORE);
-
-  // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
-}
-
-// LOOP FUNCTION - REINITIATES SLEEP
-void loop() {
-  
-  // Empty. Things are done in Tasks.
-  
-}
-
-void FLOW( void *pvParameters ) {
-  // Make sure task loops infinitely
-  
-  (void) pvParameters;
-
-  // Used to check stack size:
-  // UBaseType_t uxHighWaterMark; // Stack size is 
-  // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-  // delay(10);
-
-  // Set flow meter connection as input
-  pinMode(FLOW_PIN, INPUT);
-
-  while (1) {
-    FLOW_ready_for_sleep = false;
-    // Constantly read flow count and update after every PULSE_TIMEOUT - Change this
-    // value if need be
-    DBG("Test 1 - FLOW");
-    
-    flowCount();
-    
-    DBG("Test 2 - FLOW");
-    FLOW_ready_for_sleep = true;
-    delay(PULSE_TIMEOUT); // Wait x seconds for ready_for_sleep to take effect
-  }
-  
-  // uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-  // DBG("Stack size FLOW: ", uxHighWaterMark);
-}
-
-
-void SIM( void *pvParameters ) {
-  // Make sure task loops infinitely
-  
-  (void) pvParameters;
-
-  // Used to check stack size:
-  // UBaseType_t uxHighWaterMark; // Stack size is 101732
-  // uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-  // delay(10);
 
   // SIM7600 pin operations & definitions
   // POWER_PIN : This pin controls the power supply of the SIM7600
@@ -229,24 +150,12 @@ void SIM( void *pvParameters ) {
 
   // Put Board to sleep
   esp_light_sleep_start();
+}
 
-  while (1) {
-    wake();
+// LOOP FUNCTION - REINITIATES SLEEP
+void loop() {
+  wake();
+  DBG("Going to sleep for %d s", SLEEP_TIME); 
+  esp_light_sleep_start();
 
-    while (FLOW_ready_for_sleep == false) {
-      delay(10000); // Wait x seconds before uploading again
-      
-      // if net handshake is correctly performed, post data via HTTP Protocol
-      if(netstatus == true){
-        httpPost();
-      }
-    }
-
-    gsmPowerDown();
-    DBG("Going to sleep for %d s", SLEEP_TIME); 
-    esp_light_sleep_start();
-  }
-  
-  // uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-  // DBG("Stack size SIM: ", uxHighWaterMark);
 }
