@@ -30,7 +30,7 @@ const char gprsPass[] = "";
 #define LED_PIN    12
 #define IND_PIN    36
 
-#define FLOW_PIN   GPIO_NUM_33
+#define FLOW_PIN   GPIO_NUM_32
 
 // LIBRARY INCLUSIONS
 #include <TinyGsmClient.h>
